@@ -1,66 +1,28 @@
 {
   "name": "trianglify",
   "version": "4.1.1",
-  "description": "Trianglify is a javascript library for generating colorful triangle meshes that can be used as SVG images and CSS backgrounds.",
-  "main": "dist/trianglify.js",
-  "scripts": {
-    "lint": "standard",
-    "test": "jest",
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "publish-beta": "npm run build && npm publish --tag next",
-    "ci": "npm run lint && npm run build && npm run test"
-  },
+  "description": "Minimal browser-only build of Trianglify: algorithmically generated triangle-art backgrounds on a <canvas>.",
+  "type": "module",
+  "main": "src/trianglify.js",
+  "exports": "./src/trianglify.js",
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "chroma-js": "^2.1.0",
-    "delaunator": "^4.0.1",
-    "canvas": "^2.6.1"
-  },
-  "directories": {
-    "example": "examples"
+    "delaunator": "^4.0.1"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/qrohlf/trianglify.git"
   },
   "keywords": [
-    "svg",
     "canvas",
-    "visualization",
     "pattern",
-    "lowpoly"
+    "lowpoly",
+    "background"
   ],
-  "standard": {
-    "parser": "babel-eslint",
-    "ignore": [
-      "dist",
-      "**/vendor/**"
-    ]
-  },
-  "jest": {
-    "setupFiles": [
-      "jest-canvas-mock"
-    ]
-  },
-  "author": "Quinn Rohlf <qr@qrohlf.com>",
+  "author": "Quinn Rohlf",
   "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/qrohlf/trianglify/issues"
-  },
-  "homepage": "https://github.com/qrohlf/trianglify",
-  "devDependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.8.3",
-    "@babel/plugin-syntax-class-properties": "^7.8.3",
-    "@babel/preset-env": "^7.9.6",
-    "@rollup/plugin-babel": "^5.0.0",
-    "@rollup/plugin-commonjs": "^11.1.0",
-    "@rollup/plugin-node-resolve": "^7.1.3",
-    "babel-eslint": "^10.1.0",
-    "jest": "^25.5.4",
-    "jest-canvas-mock": "^2.2.0",
-    "rollup": "^2.7.2",
-    "rollup-plugin-bundle-size": "^1.0.3",
-    "rollup-plugin-terser": "^5.3.0",
-    "standard": "^14.3.3"
-  }
+  "homepage": "https://github.com/qrohlf/trianglify"
 }

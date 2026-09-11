@@ -1,20 +1,16 @@
 /*
- * Trianglify.js
- * by @qrohlf
- *
+ * Trianglify.js — minimal browser-only build
+ * Based on Trianglify by @qrohlf (https://github.com/qrohlf/trianglify)
  * Licensed under the GPLv3
  */
 
 import Delaunator from 'delaunator'
-// TODO - evaluate smaller alternatives
-// (chroma bloats bundle by 40k, minified)
 import chroma from 'chroma-js'
 
-import colorbrewer from './utils/colorbrewer'
-import Pattern from './pattern'
-import mulberry32 from './utils/mulberry32'
-import * as geom from './utils/geom'
-import * as colorFunctions from './utils/colorFunctions'
+import colorbrewer from './utils/colorbrewer.js'
+import Pattern from './pattern.js'
+import mulberry32 from './utils/mulberry32.js'
+import { getCentroid } from './utils/geom.js'
 
 const defaultOptions = {
   width: 600,
@@ -26,7 +22,6 @@ const defaultOptions = {
   yColors: 'match',
   palette: colorbrewer,
   colorSpace: 'lab',
-  colorFunction: colorFunctions.interpolateLinear(0.5),
   fill: true,
   strokeWidth: 0,
   points: null
@@ -94,13 +89,9 @@ export default function trianglify (_opts = {}) {
   const points = opts.points || getPoints(opts, rand)
 
   // Once we have the points array, run the triangulation
-  var geomIndices = Delaunator.from(points).triangles
-  // ...and then generate geometry and color data:
+  const geomIndices = Delaunator.from(points).triangles
 
-  // use a different (salted) randomizer for the color function so that
-  // swapping out color functions doesn't change the pattern geometry itself
-  const salt = 42
-  const cRand = mulberry32(opts.seed ? opts.seed + salt : null)
+  // ...and then generate geometry and color data:
   const polys = []
 
   for (let i = 0; i < geomIndices.length; i += 3) {
@@ -116,22 +107,17 @@ export default function trianglify (_opts = {}) {
 
     const { width, height } = opts
     const norm = num => Math.max(0, Math.min(1, num))
-    const centroid = geom.getCentroid(vertices)
+    const centroid = getCentroid(vertices)
     const xPercent = norm(centroid.x / width)
     const yPercent = norm(centroid.y / height)
 
-    const color = opts.colorFunction({
-      centroid, // centroid of polygon, non-normalized
-      xPercent, // x-coordinate of centroid, normalized to [0, 1]
-      yPercent, // y-coordinate of centroid, normalized to [0, 1]
-      vertexIndices, // vertex indices of the polygon
-      vertices, // [x, y] vertices of the polygon
-      xScale, // x-colors scale for the pattern
-      yScale, // y-colors scale for the pattern
-      points, // array of generated points for the pattern
-      opts, // options used to initialize the pattern
-      random: cRand // seeded randomization function for use by color functions
-    })
+    // default coloring: linear interpolation of the x and y gradients
+    const color = chroma.mix(
+      xScale(xPercent),
+      yScale(yPercent),
+      0.5,
+      opts.colorSpace
+    )
 
     polys.push({
       vertexIndices,
@@ -168,7 +154,6 @@ const getPoints = (opts, random) => {
     const col = i % colCount
     const row = Math.floor(i / colCount)
 
-    // [x, y, z]
     return [
       -bleedX + col * cellSize + halfCell + getJitter(),
       -bleedY + row * cellSize + halfCell + getJitter()
@@ -177,13 +162,3 @@ const getPoints = (opts, random) => {
 
   return points
 }
-
-// tweak some of the exports here
-trianglify.utils = {
-  mix: chroma.mix,
-  colorbrewer
-}
-
-trianglify.colorFunctions = colorFunctions
-trianglify.Pattern = Pattern
-trianglify.defaultOptions = defaultOptions

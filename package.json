@@ -1,28 +1,9 @@
 {
   "name": "trianglify",
-  "version": "4.1.1",
-  "description": "Minimal browser-only build of Trianglify: algorithmically generated triangle-art backgrounds on a <canvas>.",
+  "module": "src/trianglify.js",
   "type": "module",
-  "main": "src/trianglify.js",
-  "exports": "./src/trianglify.js",
-  "files": [
-    "src"
-  ],
   "dependencies": {
-    "chroma-js": "^2.1.0",
-    "delaunator": "^4.0.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/qrohlf/trianglify.git"
-  },
-  "keywords": [
-    "canvas",
-    "pattern",
-    "lowpoly",
-    "background"
-  ],
-  "author": "Quinn Rohlf",
-  "license": "GPL-3.0",
-  "homepage": "https://github.com/qrohlf/trianglify"
+    "chroma-js": "^3.2.0",
+    "delaunator": "^5.1.0"
+  }
 }

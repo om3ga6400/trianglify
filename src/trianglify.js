@@ -49,8 +49,10 @@ export default function trianglify (_opts = {}) {
     throw TypeError(`invalid width: ${opts.width}`)
   }
 
-  // standard randomizer, used for point gen and layout
-  const rand = mulberry32(opts.seed)
+  // Keep the generated seed so each point can derive its randomness from its
+  // grid coordinate when the artboard is expanded.
+  const seed = opts.seed ?? Math.random().toString(36)
+  const rand = mulberry32(seed)
 
   const randomFromPalette = () => {
     if (opts.palette instanceof Array) {
@@ -86,7 +88,7 @@ export default function trianglify (_opts = {}) {
 
   // Our next step is to generate a pseudo-random grid of {x, y} points,
   // (or to simply utilize the points that were passed to us)
-  const points = opts.points || getPoints(opts, rand)
+  const points = opts.points || getPoints(opts, seed)
 
   // Once we have the points array, run the triangulation
   const geomIndices = Delaunator.from(points).triangles
@@ -129,36 +131,32 @@ export default function trianglify (_opts = {}) {
   return new Pattern(points, polys, opts)
 }
 
-const getPoints = (opts, random) => {
+const getPoints = (opts, seed) => {
   const { width, height, cellSize, variance } = opts
 
   // pad by 2 cells outside the visible area on each side to ensure we fully
   // cover the 'artboard'
-  const colCount = Math.floor(width / cellSize) + 4
-  const rowCount = Math.floor(height / cellSize) + 4
-
-  // determine bleed values to ensure that the grid is centered within the
-  // artboard
-  const bleedX = ((colCount * cellSize) - width) / 2
-  const bleedY = ((rowCount * cellSize) - height) / 2
+  const colStart = Math.floor(-width / (2 * cellSize)) - 2
+  const colEnd = Math.ceil(width / (2 * cellSize)) + 2
+  const rowStart = Math.floor(-height / (2 * cellSize)) - 2
+  const rowEnd = Math.ceil(height / (2 * cellSize)) + 2
 
   // apply variance to cellSize to get cellJitter in pixels
   const cellJitter = cellSize * variance
-  const getJitter = () => (random() - 0.5) * cellJitter
-
-  const pointCount = colCount * rowCount
-
   const halfCell = cellSize / 2
+  const points = []
 
-  const points = Array(pointCount).fill(null).map((_, i) => {
-    const col = i % colCount
-    const row = Math.floor(i / colCount)
+  for (let row = rowStart; row < rowEnd; row++) {
+    for (let col = colStart; col < colEnd; col++) {
+      const random = mulberry32(`${seed}:${col}:${row}`)
+      const getJitter = () => (random() - 0.5) * cellJitter
 
-    return [
-      -bleedX + col * cellSize + halfCell + getJitter(),
-      -bleedY + row * cellSize + halfCell + getJitter()
-    ]
-  })
+      points.push([
+        width / 2 + col * cellSize + halfCell + getJitter(),
+        height / 2 + row * cellSize + halfCell + getJitter()
+      ])
+    }
+  }
 
   return points
 }

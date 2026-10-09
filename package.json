@@ -1,6 +1,7 @@
 {
   "name": "trianglify",
   "module": "src/trianglify.js",
+  "types": "src/trianglify.d.ts",
   "type": "module",
   "dependencies": {
     "chroma-js": "^3.2.0",
